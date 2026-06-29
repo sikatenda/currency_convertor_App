@@ -22,7 +22,7 @@ class _MyUsdState extends State<MyUsd> {
   double zarAmount = 0.0;
   double eurAmount = 0.0;
   double gbpAmount = 0.0;
-  bool isLoading = false;
+  bool isLoading = true;
 
   @override
   initState() {
@@ -31,6 +31,10 @@ class _MyUsdState extends State<MyUsd> {
   }
 
   Future<void> _getRates() async {
+    //loading circle
+    isLoading = true;
+
+    // get rates
     final zar = await convertUsdToZar();
     final eur = await convertUsdToEur();
     final gbp = await convertUsdToGbp();
@@ -42,6 +46,10 @@ class _MyUsdState extends State<MyUsd> {
       eurRate = double.parse(eurRate.toStringAsFixed(2));
       gbpRate = gbp;
       gbpRate = double.parse(gbpRate.toStringAsFixed(2));
+    });
+
+    setState(() {
+      isLoading = false;
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -94,25 +102,34 @@ class _MyUsdState extends State<MyUsd> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MyHome()),
-                    );
-                  },
-                  icon: const Icon(Icons.arrow_back),
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(6, 12, 0, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MyHome()),
+                      );
+                    },
+                    icon: const Icon(Icons.arrow_back),
+                  ),
+                ],
+              ),
             ),
             Center(
               child: Column(

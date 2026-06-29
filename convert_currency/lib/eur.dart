@@ -22,15 +22,19 @@ class _MyEurState extends State<MyEur> {
   double usdAmount = 0.0;
   double zarAmount = 0.0;
   double gbpAmount = 0.0;
-  bool isLoading = false;
+  bool isLoading = true;
 
   @override
-  initState() {
+  void initState() {
     super.initState();
     _getRates();
   }
 
   Future<void> _getRates() async {
+    //loading circle
+    isLoading = true;
+
+    // getting the rate
     final usd = await convertEurToUsd();
     final zar = await convertEurToZar();
     final gbp = await convertEurToGbp();
@@ -42,6 +46,10 @@ class _MyEurState extends State<MyEur> {
       zarRate = double.parse(zarRate.toStringAsFixed(2));
       gbpRate = gbp;
       gbpRate = double.parse(gbpRate.toStringAsFixed(2));
+    });
+
+    setState(() {
+      isLoading = false;
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -94,31 +102,41 @@ class _MyEurState extends State<MyEur> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      usdAmount = 0.0;
-                      zarAmount = 0.0;
-                      gbpAmount = 0.0;
-                      _controller.clear();
-                    });
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MyHome()),
-                    );
-                  },
-                  icon: const Icon(Icons.arrow_back),
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(6, 18, 0, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        usdAmount = 0.0;
+                        zarAmount = 0.0;
+                        gbpAmount = 0.0;
+                        _controller.clear();
+                      });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MyHome()),
+                      );
+                    },
+                    icon: const Icon(Icons.arrow_back),
+                  ),
+                ],
+              ),
             ),
             Center(
               child: Column(
