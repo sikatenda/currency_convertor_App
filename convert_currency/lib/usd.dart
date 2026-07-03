@@ -23,6 +23,7 @@ class _MyUsdState extends State<MyUsd> {
   double eurAmount = 0.0;
   double gbpAmount = 0.0;
   bool isLoading = true;
+  String error = "";
 
   @override
   initState() {
@@ -33,6 +34,7 @@ class _MyUsdState extends State<MyUsd> {
   Future<void> _getRates() async {
     //loading circle
     isLoading = true;
+
 
     // get rates
     final zar = await convertUsdToZar();
@@ -52,10 +54,33 @@ class _MyUsdState extends State<MyUsd> {
       isLoading = false;
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    
+    try {
+      // get rates
+      final zar = await convertUsdToZar();
+      final eur = await convertUsdToEur();
+      final gbp = await convertUsdToGbp();
+
+      setState(() {
+        zarRate = zar;
+        zarRate = double.parse(zarRate.toStringAsFixed(2));
+        eurRate = eur;
+        eurRate = double.parse(eurRate.toStringAsFixed(2));
+        gbpRate = gbp;
+        gbpRate = double.parse(gbpRate.toStringAsFixed(2));
+
+        //update error message
+        error = "";
+      });
+    } catch (e) {
+      //display the error message
+      setState(() {
+        error = "Request failled, please check your connection!";
+      });
+    }
+
+    setState(() {
+      isLoading = false;
     });
   }
 
@@ -84,15 +109,15 @@ class _MyUsdState extends State<MyUsd> {
         gbpRate = double.parse(gbpRate.toStringAsFixed(2));
         gbpAmount = gbpRate * double.parse(_controller.text);
         gbpAmount = double.parse(gbpAmount.toStringAsFixed(2));
+
+        //update error message
+        error = "";
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      //display the error message
+      setState(() {
+        error = "Request failled, please check your connection!";
+      });
     } finally {
       setState(() {
         isLoading = false;
@@ -323,6 +348,18 @@ class _MyUsdState extends State<MyUsd> {
                   const Text(
                     'Powered by FERUZI',
                     style: TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      error,
+                      //textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.redAccent,
+                      ),
+                    ),
                   ),
                 ],
               ),

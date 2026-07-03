@@ -23,6 +23,7 @@ class _MyGbpState extends State<MyGbp> {
   double eurAmount = 0.0;
   double zarAmount = 0.0;
   bool isLoading = true;
+  String error = "";
 
   @override
   initState() {
@@ -39,13 +40,33 @@ class _MyGbpState extends State<MyGbp> {
     final eur = await convertGbpToEur();
     final zar = await convertGbpToZar();
 
+    try {
+      // get rates
+      final usd = await convertGbpToUsd();
+      final eur = await convertGbpToEur();
+      final zar = await convertGbpToZar();
+
+      setState(() {
+        usdRate = usd;
+        usdRate = double.parse(usdRate.toStringAsFixed(2));
+        eurRate = eur;
+        eurRate = double.parse(eurRate.toStringAsFixed(2));
+        zarRate = zar;
+        zarRate = double.parse(zarRate.toStringAsFixed(2));
+
+        //update error message
+        error = "";
+      });
+    } catch (e) {
+      //display the error message
+      setState(() {
+        error = "Request failled, please check your connection!";
+      });
+    }
+
+
     setState(() {
-      usdRate = usd;
-      usdRate = double.parse(usdRate.toStringAsFixed(2));
-      eurRate = eur;
-      eurRate = double.parse(eurRate.toStringAsFixed(2));
-      zarRate = zar;
-      zarRate = double.parse(zarRate.toStringAsFixed(2));
+      isLoading = false;
     });
 
     setState(() {
@@ -84,15 +105,15 @@ class _MyGbpState extends State<MyGbp> {
         zarRate = double.parse(zarRate.toStringAsFixed(2));
         zarAmount = zarRate * double.parse(_controller.text);
         zarAmount = double.parse(zarAmount.toStringAsFixed(2));
+
+        //update error message
+        error = "";
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      //display the error message
+      setState(() {
+        error = "Request failled, please check your connection!";
+      });
     } finally {
       setState(() {
         isLoading = false;
@@ -329,6 +350,18 @@ class _MyGbpState extends State<MyGbp> {
                   const Text(
                     'Powered by FERUZI',
                     style: TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      error,
+                      //textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.redAccent,
+                      ),
+                    ),
                   ),
                 ],
               ),

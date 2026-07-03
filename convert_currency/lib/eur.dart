@@ -23,6 +23,7 @@ class _MyEurState extends State<MyEur> {
   double zarAmount = 0.0;
   double gbpAmount = 0.0;
   bool isLoading = true;
+  String error = "";
 
   @override
   void initState() {
@@ -33,6 +34,7 @@ class _MyEurState extends State<MyEur> {
   Future<void> _getRates() async {
     //loading circle
     isLoading = true;
+
 
     // getting the rate
     final usd = await convertEurToUsd();
@@ -52,10 +54,34 @@ class _MyEurState extends State<MyEur> {
       isLoading = false;
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+   
+    try {
+      // getting the rate
+      final usd = await convertEurToUsd();
+      final zar = await convertEurToZar();
+      final gbp = await convertEurToGbp();
+
+      setState(() {
+        usdRate = usd;
+        usdRate = double.parse(usdRate.toStringAsFixed(2));
+        zarRate = zar;
+        zarRate = double.parse(zarRate.toStringAsFixed(2));
+        gbpRate = gbp;
+        gbpRate = double.parse(gbpRate.toStringAsFixed(2));
+
+        //update error message
+        error = "";
+      });
+    } catch (e) {
+      //display the error message
+      setState(() {
+        error = "Request failled, please check your connection!";
+      });
+    }
+
+    setState(() {
+      isLoading = false;
+
     });
   }
 
@@ -84,15 +110,15 @@ class _MyEurState extends State<MyEur> {
         gbpRate = double.parse(gbpRate.toStringAsFixed(2));
         gbpAmount = gbpRate * double.parse(_controller.text);
         gbpAmount = double.parse(gbpAmount.toStringAsFixed(2));
+
+        //update error message
+        error = "";
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      //display the error message
+      setState(() {
+        error = "Request failled, please check your connection!";
+      });
     } finally {
       setState(() {
         isLoading = false;
@@ -330,6 +356,17 @@ class _MyEurState extends State<MyEur> {
                   const Text(
                     'Powered by FERUZI',
                     style: TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      error,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.redAccent,
+                      ),
+                    ),
                   ),
                 ],
               ),
