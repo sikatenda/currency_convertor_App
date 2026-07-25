@@ -1,4 +1,4 @@
-package com.example.convert_currency
+package com.feruzi.currencyconverter
 
 import io.flutter.embedding.android.FlutterActivity
 
